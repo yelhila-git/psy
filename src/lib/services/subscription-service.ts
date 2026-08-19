@@ -6,7 +6,7 @@ import type {
   SubscriptionPlanId,
   SubscriptionWithPlan,
 } from '@/types';
-import { api, USE_MOCK } from '@/lib/api-client';
+import { api, isLive } from '@/lib/api-client';
 import { delay } from '@/lib/utils';
 import { SUBSCRIPTION_PLANS, planById } from '@/lib/constants';
 import {
@@ -43,14 +43,14 @@ export interface SubscriptionPaymentResult {
 export const subscriptionService = {
   /** GET /api/subscription-plans — admin-editable, hence fetched not hardcoded. */
   async plans(): Promise<SubscriptionPlan[]> {
-    if (!USE_MOCK) return api.get<SubscriptionPlan[]>('/subscription-plans');
+    if (isLive('subscriptions')) return api.get<SubscriptionPlan[]>('/subscription-plans');
     await delay(120);
     return SUBSCRIPTION_PLANS;
   },
 
   /** GET /api/psychologists/{id}/subscription */
   async forPsychologist(psychologistId: ID): Promise<SubscriptionWithPlan | null> {
-    if (!USE_MOCK) {
+    if (isLive('subscriptions')) {
       return api
         .get<SubscriptionWithPlan>(`/psychologists/${psychologistId}/subscription`)
         .catch(() => null);
@@ -80,7 +80,7 @@ export const subscriptionService = {
    * price taken can never diverge.
    */
   async quote(psychologistId: ID, planId: SubscriptionPlanId): Promise<SubscriptionChangeQuote> {
-    if (!USE_MOCK) {
+    if (isLive('subscriptions')) {
       return api.get<SubscriptionChangeQuote>(
         `/psychologists/${psychologistId}/subscription/quote`,
         { params: { plan_id: planId } },
@@ -101,7 +101,7 @@ export const subscriptionService = {
    * the free tier. Anything billable must go through `pay`.
    */
   async changePlan(psychologistId: ID, planId: SubscriptionPlanId): Promise<SubscriptionWithPlan> {
-    if (!USE_MOCK) {
+    if (isLive('subscriptions')) {
       return api.post<SubscriptionWithPlan>(`/psychologists/${psychologistId}/subscription`, {
         plan_id: planId,
       });
@@ -144,7 +144,7 @@ export const subscriptionService = {
    * integration would, since the PAN goes straight to CMI.
    */
   async pay(input: PaySubscriptionInput): Promise<SubscriptionPaymentResult> {
-    if (!USE_MOCK) {
+    if (isLive('subscriptions')) {
       return api.post<SubscriptionPaymentResult>(
         `/psychologists/${input.psychologistId}/subscription/pay`,
         { plan_id: input.planId },
@@ -219,7 +219,7 @@ export const subscriptionService = {
 
   /** GET /api/psychologists/{id}/subscription/invoices */
   async invoices(psychologistId: ID): Promise<SubscriptionInvoice[]> {
-    if (!USE_MOCK) {
+    if (isLive('subscriptions')) {
       return api.get<SubscriptionInvoice[]>(
         `/psychologists/${psychologistId}/subscription/invoices`,
       );
@@ -232,7 +232,7 @@ export const subscriptionService = {
 
   /** POST /api/psychologists/{id}/subscription/cancel */
   async cancel(psychologistId: ID): Promise<SubscriptionWithPlan | null> {
-    if (!USE_MOCK) {
+    if (isLive('subscriptions')) {
       return api.post<SubscriptionWithPlan>(`/psychologists/${psychologistId}/subscription/cancel`);
     }
     await delay(500);
@@ -246,7 +246,7 @@ export const subscriptionService = {
 
   /** Ids of practitioners currently open to bookings — powers the marketplace. */
   async bookablePsychologistIds(): Promise<Set<ID>> {
-    if (!USE_MOCK) {
+    if (isLive('subscriptions')) {
       const ids = await api.get<ID[]>('/subscriptions/bookable');
       return new Set(ids);
     }
@@ -261,7 +261,7 @@ export const subscriptionService = {
 
   /** Monthly recurring revenue across every live subscription, in centimes. */
   async monthlyRecurringRevenue(): Promise<number> {
-    if (!USE_MOCK) return api.get<number>('/admin/subscriptions/mrr');
+    if (isLive('subscriptions')) return api.get<number>('/admin/subscriptions/mrr');
     await delay(100);
     return subscriptions
       .map(resolveSubscription)

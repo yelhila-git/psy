@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Mail } from 'lucide-react';
 import type { UserRole } from '@/types';
 import { cn } from '@/lib/utils';
+import { ApiError, isLive } from '@/lib/api-client';
+import { authService } from '@/lib/services';
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/misc';
@@ -38,11 +40,37 @@ export default function LoginPage() {
     if (Object.keys(next).length) return;
 
     setSubmitting(true);
-    // Auth is stubbed: the role selector routes to the matching dashboard.
-    // Replace with POST /api/login and a token exchange when Laravel is ready.
-    await new Promise((r) => setTimeout(r, 600));
-    toast({ title: 'Connexion réussie', variant: 'success' });
-    router.push(ROLES.find((r) => r.value === role)!.home);
+
+    // Without a backend the role selector still routes to the matching space,
+    // so the demo stays walkable with the API stopped.
+    if (!isLive('auth')) {
+      await new Promise((r) => setTimeout(r, 600));
+      toast({ title: 'Connexion réussie', variant: 'success' });
+      router.push(ROLES.find((r) => r.value === role)!.home);
+      return;
+    }
+
+    try {
+      const result = await authService.login(email, password);
+      // A cookie, not localStorage: the dashboard pages are server components
+      // and read the token back through next/headers.
+      document.cookie = `amp_token=${result.token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+      toast({ title: 'Connexion réussie', variant: 'success' });
+      router.push(
+        result.user.role === 'psychologist'
+          ? '/dashboard/psychologist'
+          : result.user.role === 'admin'
+            ? '/admin'
+            : '/dashboard/patient',
+      );
+    } catch (error) {
+      setSubmitting(false);
+      if (error instanceof ApiError && error.status === 422) {
+        setErrors({ email: error.errors?.email?.[0] ?? error.message });
+        return;
+      }
+      toast({ title: 'Connexion impossible', variant: 'error' });
+    }
   };
 
   return (
@@ -52,7 +80,9 @@ export default function LoginPage() {
         Connectez-vous pour retrouver vos rendez-vous et vos échanges.
       </p>
 
-      {/* Role selector — demo affordance so every space is reachable. */}
+      {/* Role selector — demo affordance so every space is reachable while the
+          app runs on mock data. The real login derives the space from the API. */}
+      {!isLive('auth') && (
       <div className="mt-7">
         <p className="mb-2 text-base font-medium text-secondary">Je me connecte en tant que</p>
         <div className="grid grid-cols-3 gap-2">
@@ -74,6 +104,7 @@ export default function LoginPage() {
           ))}
         </div>
       </div>
+      )}
 
       <form onSubmit={submit} className="mt-6 space-y-4">
         <Field label="Adresse e-mail" htmlFor="email" error={errors.email} required>

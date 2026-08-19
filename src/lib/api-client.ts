@@ -16,6 +16,34 @@ export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 /** True while the app is running on mock repositories. */
 export const USE_MOCK = !API_URL;
 
+/**
+ * Which parts of the API are actually built.
+ *
+ * The backend lands one milestone at a time, so `NEXT_PUBLIC_API_URL` alone is
+ * not enough to decide whether a call can be made — pointing at the API would
+ * otherwise send all thirty-odd endpoints live at once and 404 on everything a
+ * milestone has not reached yet. `NEXT_PUBLIC_LIVE_SERVICES` is the allowlist
+ * of what is backed; everything absent from it keeps resolving from mocks.
+ *
+ * Entries are either a whole service (`psychologists`) or a single method
+ * (`psychologists.list`), so a service can go live one endpoint at a time and
+ * collapse to its bare name once the backend covers all of it.
+ */
+const LIVE_SERVICES = new Set(
+  (process.env.NEXT_PUBLIC_LIVE_SERVICES ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
+);
+
+/** True when `capability` ("psychologists" or "psychologists.list") is backed. */
+export function isLive(capability: string): boolean {
+  if (!API_URL) return false;
+  if (LIVE_SERVICES.has(capability)) return true;
+  const service = capability.split('.')[0]!;
+  return LIVE_SERVICES.has(service);
+}
+
 export class ApiError extends Error {
   constructor(
     message: string,

@@ -1,5 +1,5 @@
 import type { Conversation, ID, Message, UserRole } from '@/types';
-import { api, ENDPOINTS, USE_MOCK } from '@/lib/api-client';
+import { api, ENDPOINTS, isLive } from '@/lib/api-client';
 import { delay } from '@/lib/utils';
 import { conversations, messages, messagesForConversation } from '@/lib/mock/messages';
 import { psychologistById } from '@/lib/mock/psychologists';
@@ -13,7 +13,7 @@ export const messageService = {
    * sees the practitioner, a practitioner sees the patient.
    */
   async conversations(viewerId: ID, viewerRole: UserRole): Promise<Conversation[]> {
-    if (!USE_MOCK) {
+    if (isLive('messages')) {
       return api.get<Conversation[]>(ENDPOINTS.conversations, { params: { role: viewerRole } });
     }
     await delay(200);
@@ -38,14 +38,14 @@ export const messageService = {
 
   /** GET /api/conversations/{id}/messages */
   async messages(conversationId: ID): Promise<Message[]> {
-    if (!USE_MOCK) return api.get<Message[]>(ENDPOINTS.messages(conversationId));
+    if (isLive('messages')) return api.get<Message[]>(ENDPOINTS.messages(conversationId));
     await delay(160);
     return messagesForConversation(conversationId);
   },
 
   /** POST /api/conversations/{id}/messages */
   async send(conversationId: ID, senderId: ID, senderRole: UserRole, body: string): Promise<Message> {
-    if (!USE_MOCK) {
+    if (isLive('messages')) {
       return api.post<Message>(ENDPOINTS.messages(conversationId), { body });
     }
     await delay(240);
@@ -71,7 +71,7 @@ export const messageService = {
   },
 
   async markRead(conversationId: ID): Promise<void> {
-    if (!USE_MOCK) {
+    if (isLive('messages')) {
       await api.post(`${ENDPOINTS.messages(conversationId)}/read`);
       return;
     }
@@ -90,7 +90,7 @@ export const messageService = {
 
   /** Resolves (or opens) the thread between a patient and a practitioner. */
   async findOrCreate(patientId: ID, psychologistId: ID): Promise<Conversation> {
-    if (!USE_MOCK) {
+    if (isLive('messages')) {
       return api.post<Conversation>(ENDPOINTS.conversations, {
         patient_id: patientId,
         psychologist_id: psychologistId,

@@ -2,8 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
-import { psychologistService } from '@/lib/services';
-import { CURRENT_PSYCHOLOGIST_ID } from '@/lib/mock/patients';
+import { currentPsychologist } from '@/lib/session';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/dashboard/shell';
 import { PsychologistProfileForm } from '@/components/dashboard/psychologist-profile-form';
@@ -11,7 +10,7 @@ import { PsychologistProfileForm } from '@/components/dashboard/psychologist-pro
 export const metadata: Metadata = { title: 'Mon profil' };
 
 export default async function PsychologistProfilePage() {
-  const psychologist = await psychologistService.getById(CURRENT_PSYCHOLOGIST_ID);
+  const psychologist = await currentPsychologist();
   if (!psychologist) notFound();
 
   return (

@@ -1,5 +1,5 @@
 import type { ConsultationInvoice, ConsultationInvoiceStatus, ID, Paginated } from '@/types';
-import { api, ENDPOINTS, USE_MOCK } from '@/lib/api-client';
+import { api, ENDPOINTS, isLive } from '@/lib/api-client';
 import { delay } from '@/lib/utils';
 import { buildInvoice, buildInvoiceReference, isInvoiceable, summarise } from '@/lib/invoices';
 import {
@@ -108,7 +108,7 @@ export function issueForAppointmentSync(appointmentId: ID): ConsultationInvoice 
 export const invoiceService = {
   /** GET /api/invoices */
   async list(query: InvoiceQuery = {}): Promise<Paginated<ConsultationInvoice>> {
-    if (!USE_MOCK) {
+    if (isLive('invoices')) {
       return api.get<Paginated<ConsultationInvoice>>(ENDPOINTS.invoices, {
         params: {
           psychologist_id: query.psychologistId,
@@ -143,7 +143,7 @@ export const invoiceService = {
 
   /** GET /api/invoices/{id} */
   async getById(id: ID): Promise<ConsultationInvoice | null> {
-    if (!USE_MOCK) {
+    if (isLive('invoices')) {
       return api.get<ConsultationInvoice>(ENDPOINTS.invoice(id)).catch(() => null);
     }
     await delay(120);
@@ -151,7 +151,7 @@ export const invoiceService = {
   },
 
   async getByAppointment(appointmentId: ID): Promise<ConsultationInvoice | null> {
-    if (!USE_MOCK) {
+    if (isLive('invoices')) {
       return api
         .get<ConsultationInvoice>(ENDPOINTS.invoices, { params: { appointment_id: appointmentId } })
         .catch(() => null);
@@ -167,7 +167,7 @@ export const invoiceService = {
    * practitioner confirming the payment.
    */
   async issueForAppointment(appointmentId: ID): Promise<ConsultationInvoice | null> {
-    if (!USE_MOCK) {
+    if (isLive('invoices')) {
       return api
         .post<ConsultationInvoice>(`${ENDPOINTS.appointment(appointmentId)}/invoice`)
         .catch(() => null);
@@ -178,7 +178,7 @@ export const invoiceService = {
 
   /** Header totals for the practitioner's invoice list. */
   async statsFor(psychologistId: ID) {
-    if (!USE_MOCK) {
+    if (isLive('invoices')) {
       const all = await api.get<Paginated<ConsultationInvoice>>(ENDPOINTS.invoices, {
         params: { psychologist_id: psychologistId, per_page: 500 },
       });

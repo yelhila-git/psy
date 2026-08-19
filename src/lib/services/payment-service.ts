@@ -9,7 +9,7 @@ import type {
   PsychologistPaymentInfo,
   TransferMethod,
 } from '@/types';
-import { api, ENDPOINTS, USE_MOCK } from '@/lib/api-client';
+import { api, ENDPOINTS, isLive } from '@/lib/api-client';
 import { delay } from '@/lib/utils';
 import {
   buildPaymentReference,
@@ -151,7 +151,7 @@ export interface PaymentQuery {
 export const paymentService = {
   /** GET /api/payments */
   async list(query: PaymentQuery = {}): Promise<Paginated<PaymentWithParties>> {
-    if (!USE_MOCK) {
+    if (isLive('payments')) {
       return api.get<Paginated<PaymentWithParties>>(ENDPOINTS.payments, {
         params: {
           patient_id: query.patientId,
@@ -185,14 +185,14 @@ export const paymentService = {
   },
 
   async getById(id: ID): Promise<PaymentWithParties | null> {
-    if (!USE_MOCK) return api.get<PaymentWithParties>(ENDPOINTS.payment(id)).catch(() => null);
+    if (isLive('payments')) return api.get<PaymentWithParties>(ENDPOINTS.payment(id)).catch(() => null);
     await delay(120);
     const found = readable().find((p) => p.id === id);
     return found ? hydratePayment(found) : null;
   },
 
   async getByAppointment(appointmentId: ID): Promise<PaymentWithParties | null> {
-    if (!USE_MOCK) {
+    if (isLive('payments')) {
       return api
         .get<PaymentWithParties>(ENDPOINTS.payments, {
           params: { appointment_id: appointmentId },
@@ -211,7 +211,7 @@ export const paymentService = {
    * reference for the same appointment.
    */
   async create(appointmentId: ID): Promise<PaymentWithParties> {
-    if (!USE_MOCK) {
+    if (isLive('payments')) {
       return api.post<PaymentWithParties>(ENDPOINTS.payments, {
         appointment_id: appointmentId,
       });
@@ -256,7 +256,7 @@ export const paymentService = {
    * not receipt.
    */
   async submitProof(input: SubmitProofInput): Promise<PaymentWithParties | null> {
-    if (!USE_MOCK) {
+    if (isLive('payments')) {
       return api.post<PaymentWithParties>(`${ENDPOINTS.payment(input.paymentId)}/proof`, {
         method: input.method,
         transferred_at: input.transferredAt,
@@ -294,7 +294,7 @@ export const paymentService = {
 
   /** POST /api/payments/{id}/confirm — the practitioner attests receipt. */
   async confirm(paymentId: ID, actorId: ID): Promise<PaymentWithParties | null> {
-    if (!USE_MOCK) {
+    if (isLive('payments')) {
       return api.post<PaymentWithParties>(`${ENDPOINTS.payment(paymentId)}/confirm`);
     }
     await delay(500);
@@ -331,7 +331,7 @@ export const paymentService = {
    * common case, which is a transfer sent late or badly labelled.
    */
   async reject(paymentId: ID, actorId: ID, reason: string): Promise<PaymentWithParties | null> {
-    if (!USE_MOCK) {
+    if (isLive('payments')) {
       return api.post<PaymentWithParties>(`${ENDPOINTS.payment(paymentId)}/reject`, { reason });
     }
     await delay(500);
@@ -367,7 +367,7 @@ export const paymentService = {
   async statusByAppointment(
     query: Pick<PaymentQuery, 'patientId' | 'psychologistId'>,
   ): Promise<Record<ID, PaymentStatus>> {
-    if (!USE_MOCK) {
+    if (isLive('payments')) {
       return api.get<Record<ID, PaymentStatus>>('/payments/status-map', {
         params: {
           patient_id: query.patientId,
@@ -398,7 +398,7 @@ export const paymentService = {
 
   /** Badge count for the practitioner's "payments to confirm" queue. */
   async pendingConfirmationCount(psychologistId: ID): Promise<number> {
-    if (!USE_MOCK) {
+    if (isLive('payments')) {
       const result = await api.get<Paginated<Payment>>(ENDPOINTS.payments, {
         params: {
           psychologist_id: psychologistId,
@@ -416,7 +416,7 @@ export const paymentService = {
 
   /** GET /api/psychologists/{id}/payment-info — the practitioner's own view. */
   async paymentInfo(psychologistId: ID): Promise<PsychologistPaymentInfo | null> {
-    if (!USE_MOCK) {
+    if (isLive('payments')) {
       return api
         .get<PsychologistPaymentInfo>(`/psychologists/${psychologistId}/payment-info`)
         .catch(() => null);
@@ -430,7 +430,7 @@ export const paymentService = {
     psychologistId: ID,
     input: Omit<PsychologistPaymentInfo, 'psychologistId' | 'updatedAt'>,
   ): Promise<PsychologistPaymentInfo> {
-    if (!USE_MOCK) {
+    if (isLive('payments')) {
       return api.put<PsychologistPaymentInfo>(
         `/psychologists/${psychologistId}/payment-info`,
         input,
@@ -455,7 +455,7 @@ export const paymentService = {
    * fields that practitioner chose to expose.
    */
   async instructionsForAppointment(appointmentId: ID): Promise<PaymentInstructions | null> {
-    if (!USE_MOCK) {
+    if (isLive('payments')) {
       return api
         .get<PaymentInstructions>(`${ENDPOINTS.appointment(appointmentId)}/payment-instructions`)
         .catch(() => null);

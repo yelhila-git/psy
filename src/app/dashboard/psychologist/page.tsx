@@ -21,6 +21,7 @@ import {
   psychologistService,
   subscriptionService,
 } from '@/lib/services';
+import { currentPsychologist } from '@/lib/session';
 import { CURRENT_PSYCHOLOGIST_ID } from '@/lib/mock/patients';
 import { acceptsBookings } from '@/lib/payments';
 import { formatPrice } from '@/lib/utils';
@@ -48,7 +49,7 @@ export default async function PsychologistDashboardPage() {
     paymentInfo,
     subscription,
   ] = await Promise.all([
-      psychologistService.getById(CURRENT_PSYCHOLOGIST_ID),
+      currentPsychologist(),
       psychologistService.stats(CURRENT_PSYCHOLOGIST_ID),
       appointmentService.next({ psychologistId: CURRENT_PSYCHOLOGIST_ID }),
       appointmentService.list({ psychologistId: CURRENT_PSYCHOLOGIST_ID, scope: 'today' }),

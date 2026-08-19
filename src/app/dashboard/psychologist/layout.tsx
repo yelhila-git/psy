@@ -1,4 +1,5 @@
-import { paymentService, psychologistService } from '@/lib/services';
+import { currentPsychologist } from '@/lib/session';
+import { paymentService } from '@/lib/services';
 import { CURRENT_PSYCHOLOGIST_ID } from '@/lib/mock/patients';
 import { DashboardShell } from '@/components/dashboard/shell';
 
@@ -8,7 +9,7 @@ export default async function PsychologistDashboardLayout({
   children: React.ReactNode;
 }) {
   const [psychologist, toConfirm] = await Promise.all([
-    psychologistService.getById(CURRENT_PSYCHOLOGIST_ID),
+    currentPsychologist(),
     paymentService.pendingConfirmationCount(CURRENT_PSYCHOLOGIST_ID),
   ]);
 

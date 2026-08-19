@@ -9,9 +9,10 @@ import type {
   TimeSlot,
   VerificationStatus,
 } from '@/types';
-import { api, ENDPOINTS, USE_MOCK } from '@/lib/api-client';
+import { api, ENDPOINTS, isLive } from '@/lib/api-client';
 import { delay } from '@/lib/utils';
 import { findPsychologist, psychologists } from '@/lib/mock/psychologists';
+import { CURRENT_PSYCHOLOGIST_ID } from '@/lib/mock/patients';
 import { reviewsForPsychologist } from '@/lib/mock/reviews';
 import { appointments } from '@/lib/mock/appointments';
 import { payments } from '@/lib/mock/payments';
@@ -20,6 +21,22 @@ import { resolveSubscription } from '@/lib/subscriptions';
 import { addDays, atTime, startOfToday } from '@/lib/mock/seed';
 
 const DEFAULT_PER_PAGE = 9;
+
+/** The API takes snake_case; the domain type is camelCase. */
+function toSnakePayload(payload: Partial<Psychologist>) {
+  const { firstName, lastName, yearsOfExperience, pricePerHour, introVideoUrl,
+    acceptsNewPatients, responseTimeMinutes, ...rest } = payload;
+  return {
+    ...rest,
+    ...(firstName !== undefined && { first_name: firstName }),
+    ...(lastName !== undefined && { last_name: lastName }),
+    ...(yearsOfExperience !== undefined && { years_of_experience: yearsOfExperience }),
+    ...(pricePerHour !== undefined && { price_per_hour: pricePerHour }),
+    ...(introVideoUrl !== undefined && { intro_video_url: introVideoUrl }),
+    ...(acceptsNewPatients !== undefined && { accepts_new_patients: acceptsNewPatients }),
+    ...(responseTimeMinutes !== undefined && { response_time_minutes: responseTimeMinutes }),
+  };
+}
 
 /**
  * A practitioner is listed publicly only while their subscription lets them
@@ -83,7 +100,7 @@ function sortList(list: Psychologist[], sort: PsychologistFilters['sort']): Psyc
 export const psychologistService = {
   /** GET /api/psychologists */
   async list(filters: PsychologistFilters = {}): Promise<Paginated<Psychologist>> {
-    if (!USE_MOCK) {
+    if (isLive('psychologists.list')) {
       return api.get<Paginated<Psychologist>>(ENDPOINTS.psychologists, {
         params: {
           q: filters.query,
@@ -126,16 +143,28 @@ export const psychologistService = {
 
   /** GET /api/psychologists/{id} — accepts an id or a slug. */
   async getById(idOrSlug: ID): Promise<Psychologist | null> {
-    if (!USE_MOCK) {
+    if (isLive('psychologists.getById')) {
       return api.get<Psychologist>(ENDPOINTS.psychologist(idOrSlug)).catch(() => null);
     }
     await delay(180);
     return findPsychologist(idOrSlug) ?? null;
   },
 
+  /**
+   * The signed-in practitioner.
+   *
+   * The public route resolves a slug, never an id, so a practitioner's own
+   * profile has to come from the authenticated endpoint.
+   */
+  async current(token?: string): Promise<Psychologist> {
+    if (isLive('psychologists.current')) return api.get<Psychologist>('/me', { token });
+    await delay(80);
+    return findPsychologist(CURRENT_PSYCHOLOGIST_ID)!;
+  },
+
   /** The homepage rail: the strongest verified profiles that take new patients. */
   async featured(limit = 6): Promise<Psychologist[]> {
-    if (!USE_MOCK) {
+    if (isLive('psychologists.featured')) {
       return api
         .get<Paginated<Psychologist>>(ENDPOINTS.psychologists, {
           params: { featured: true, per_page: limit },
@@ -156,7 +185,7 @@ export const psychologistService = {
    * the section honest and stops us linking to an empty result set.
    */
   async specialtyCounts(): Promise<Record<Specialty, number>> {
-    if (!USE_MOCK) {
+    if (isLive('psychologists.specialtyCounts')) {
       return api.get<Record<Specialty, number>>(`${ENDPOINTS.psychologists}/specialty-counts`);
     }
     await delay(100);
@@ -173,7 +202,7 @@ export const psychologistService = {
 
   /** GET /api/psychologists/{id}/reviews */
   async reviews(psychologistId: ID): Promise<Review[]> {
-    if (!USE_MOCK) return api.get<Review[]>(ENDPOINTS.psychologistReviews(psychologistId));
+    if (isLive('psychologists.reviews')) return api.get<Review[]>(ENDPOINTS.psychologistReviews(psychologistId));
     await delay(140);
     return reviewsForPsychologist(psychologistId);
   },
@@ -185,7 +214,7 @@ export const psychologistService = {
    * for a given day, subtracting anything already booked.
    */
   async slotsForDate(psychologistId: ID, date: Date, durationMinutes = 60): Promise<TimeSlot[]> {
-    if (!USE_MOCK) {
+    if (isLive('psychologists.slotsForDate')) {
       return api.get<TimeSlot[]>(ENDPOINTS.psychologistSlots(psychologistId), {
         params: { date: date.toISOString().slice(0, 10), duration: durationMinutes },
       });
@@ -241,8 +270,8 @@ export const psychologistService = {
 
   /** POST /api/psychologists — psychologist self-registration. */
   async register(payload: Partial<Psychologist>): Promise<{ id: ID; status: VerificationStatus }> {
-    if (!USE_MOCK) {
-      return api.post<{ id: ID; status: VerificationStatus }>(ENDPOINTS.psychologists, payload);
+    if (isLive('psychologists.register')) {
+      return api.post<{ id: ID; status: VerificationStatus }>(ENDPOINTS.psychologists, toSnakePayload(payload));
     }
     await delay(700);
     return { id: `psy-${Date.now()}`, status: 'pending' };
@@ -250,7 +279,7 @@ export const psychologistService = {
 
   /** PATCH /api/psychologists/{id} */
   async update(id: ID, payload: Partial<Psychologist>): Promise<Psychologist | null> {
-    if (!USE_MOCK) return api.patch<Psychologist>(ENDPOINTS.psychologist(id), payload);
+    if (isLive('psychologists.update')) return api.patch<Psychologist>(ENDPOINTS.psychologist(id), toSnakePayload(payload));
     await delay(400);
     const existing = findPsychologist(id);
     return existing ? { ...existing, ...payload } : null;
@@ -258,7 +287,7 @@ export const psychologistService = {
 
   /** Dashboard KPIs for the signed-in practitioner. */
   async stats(psychologistId: ID): Promise<PsychologistStats> {
-    if (!USE_MOCK) {
+    if (isLive('psychologists.stats')) {
       return api.get<PsychologistStats>(`${ENDPOINTS.psychologist(psychologistId)}/stats`);
     }
     await delay(160);

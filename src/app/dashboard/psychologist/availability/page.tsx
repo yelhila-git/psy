@@ -1,14 +1,13 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { psychologistService } from '@/lib/services';
-import { CURRENT_PSYCHOLOGIST_ID } from '@/lib/mock/patients';
+import { currentPsychologist } from '@/lib/session';
 import { PageHeader } from '@/components/dashboard/shell';
 import { AvailabilityEditor } from '@/components/dashboard/availability-editor';
 
 export const metadata: Metadata = { title: 'Disponibilités' };
 
 export default async function AvailabilityPage() {
-  const psychologist = await psychologistService.getById(CURRENT_PSYCHOLOGIST_ID);
+  const psychologist = await currentPsychologist();
   if (!psychologist) notFound();
 
   return (

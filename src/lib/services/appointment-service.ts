@@ -5,7 +5,7 @@ import type {
   ConsultationMode,
   ID,
 } from '@/types';
-import { api, ENDPOINTS, USE_MOCK } from '@/lib/api-client';
+import { api, ENDPOINTS, isLive } from '@/lib/api-client';
 import { delay } from '@/lib/utils';
 import { consultationTerms, isFirstConsultation } from '@/lib/consultations';
 import { issueForAppointmentSync } from './invoice-service';
@@ -120,7 +120,7 @@ export interface ConsultationTerms {
 export const appointmentService = {
   /** GET /api/appointments */
   async list(query: AppointmentQuery = {}): Promise<AppointmentWithParties[]> {
-    if (!USE_MOCK) {
+    if (isLive('appointments')) {
       return api.get<AppointmentWithParties[]>(ENDPOINTS.appointments, {
         params: {
           patient_id: query.patientId,
@@ -165,7 +165,7 @@ export const appointmentService = {
 
   /** GET /api/appointments/{id} */
   async getById(id: ID): Promise<AppointmentWithParties | null> {
-    if (!USE_MOCK) {
+    if (isLive('appointments')) {
       return api.get<AppointmentWithParties>(ENDPOINTS.appointment(id)).catch(() => null);
     }
     await delay(150);
@@ -192,7 +192,7 @@ export const appointmentService = {
     psychologistId: ID,
     standardPrice: number,
   ): Promise<ConsultationTerms> {
-    if (!USE_MOCK) {
+    if (isLive('appointments')) {
       return api.get<ConsultationTerms>(
         `/psychologists/${psychologistId}/consultation-terms`,
         { params: { patient_id: patientId } },
@@ -210,7 +210,7 @@ export const appointmentService = {
    * entitlement in one call rather than one request per card.
    */
   async freeConsultationPsychologistIds(patientId: ID, candidateIds: ID[]): Promise<Set<ID>> {
-    if (!USE_MOCK) {
+    if (isLive('appointments')) {
       const ids = await api.get<ID[]>('/consultation-terms/free', {
         params: { patient_id: patientId, psychologist_ids: candidateIds },
       });
@@ -227,7 +227,7 @@ export const appointmentService = {
 
   /** Has this patient ever consulted this practitioner? Drives the profile badge. */
   async isFirstConsultation(patientId: ID, psychologistId: ID): Promise<boolean> {
-    if (!USE_MOCK) {
+    if (isLive('appointments')) {
       const result = await api.get<{ isFirstConsultation: boolean }>(
         `/psychologists/${psychologistId}/consultation-terms`,
         { params: { patient_id: patientId } },
@@ -241,7 +241,7 @@ export const appointmentService = {
 
   /** POST /api/appointments */
   async create(input: CreateAppointmentInput): Promise<AppointmentWithParties> {
-    if (!USE_MOCK) {
+    if (isLive('appointments')) {
       return api.post<AppointmentWithParties>(ENDPOINTS.appointments, {
         patient_id: input.patientId,
         psychologist_id: input.psychologistId,
@@ -294,7 +294,7 @@ export const appointmentService = {
 
   /** PATCH /api/appointments/{id} */
   async updateStatus(id: ID, status: AppointmentStatus, reason?: string) {
-    if (!USE_MOCK) {
+    if (isLive('appointments')) {
       return api.patch<Appointment>(ENDPOINTS.appointment(id), { status, cancellation_reason: reason });
     }
     await delay(350);

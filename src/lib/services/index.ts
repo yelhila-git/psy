@@ -18,3 +18,5 @@ export type { PaySubscriptionInput, SubscriptionPaymentResult } from './subscrip
 export type { PaymentQuery, SubmitProofInput } from './payment-service';
 export { messageService } from './message-service';
 export { adminService } from './admin-service';
+export { authService } from './auth-service';
+export type { AdminUser, AuthResult, AuthUser, RegisterInput } from './auth-service';

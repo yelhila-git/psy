@@ -11,7 +11,7 @@ import type {
   VerificationStatus,
 } from '@/types';
 import type { PaymentStatus, SubscriptionStatus } from '@/types';
-import { api, ENDPOINTS, USE_MOCK } from '@/lib/api-client';
+import { api, ENDPOINTS, isLive } from '@/lib/api-client';
 import { delay } from '@/lib/utils';
 import { withinRange } from '@/lib/date-range';
 import { hydrate } from '@/lib/services/appointment-service';
@@ -46,7 +46,7 @@ const paginate = <T>(rows: T[], page: number, perPage: number): Paginated<T> => 
 export const adminService = {
   /** GET /api/admin/stats */
   async stats(): Promise<AdminStats> {
-    if (!USE_MOCK) return api.get<AdminStats>(ENDPOINTS.adminStats);
+    if (isLive('admin')) return api.get<AdminStats>(ENDPOINTS.adminStats);
     await delay(220);
 
     const paid = payments.filter((p) => p.status === 'payment_confirmed');
@@ -87,7 +87,7 @@ export const adminService = {
   async psychologists(
     query: { status?: VerificationStatus | 'all'; q?: string; page?: number; perPage?: number } = {},
   ): Promise<Paginated<Psychologist>> {
-    if (!USE_MOCK) {
+    if (isLive('admin')) {
       return api.get<Paginated<Psychologist>>(ENDPOINTS.adminVerifications, {
         params: { status: query.status, q: query.q, page: query.page, per_page: query.perPage },
       });
@@ -124,7 +124,7 @@ export const adminService = {
 
   /** POST /api/admin/psychologists/{id}/approve|reject */
   async setVerification(id: ID, status: VerificationStatus, note?: string) {
-    if (!USE_MOCK) {
+    if (isLive('admin')) {
       return api.post<Psychologist>(`/admin/psychologists/${id}/verification`, { status, note });
     }
     await delay(450);
@@ -140,7 +140,7 @@ export const adminService = {
   async payments(
     query: AdminTableQuery & { status?: PaymentStatus | 'all' } = {},
   ): Promise<PaymentsReport> {
-    if (!USE_MOCK) {
+    if (isLive('admin')) {
       return api.get<PaymentsReport>('/admin/payments', {
         params: {
           q: query.q,
@@ -201,7 +201,7 @@ export const adminService = {
   async subscriptions(
     query: AdminTableQuery & { status?: SubscriptionStatus | 'all' } = {},
   ): Promise<SubscriptionsReport> {
-    if (!USE_MOCK) {
+    if (isLive('admin')) {
       return api.get<SubscriptionsReport>('/admin/subscriptions', {
         params: {
           q: query.q,
@@ -259,7 +259,7 @@ export const adminService = {
   async appointments(
     query: AdminTableQuery = {},
   ): Promise<Paginated<AppointmentWithParties> & { totals: Record<string, number> }> {
-    if (!USE_MOCK) {
+    if (isLive('admin')) {
       return api.get<Paginated<AppointmentWithParties> & { totals: Record<string, number> }>(
         '/admin/appointments',
         {
@@ -304,7 +304,7 @@ export const adminService = {
 
   /** GET /api/admin/patients — filtered on the registration date. */
   async patients(query: AdminTableQuery = {}): Promise<Paginated<Patient>> {
-    if (!USE_MOCK) {
+    if (isLive('admin')) {
       return api.get<Paginated<Patient>>('/admin/patients', {
         params: {
           q: query.q,

@@ -1,5 +1,5 @@
 import type { ID, Paginated, Patient, PatientStats, Psychologist } from '@/types';
-import { api, ENDPOINTS, USE_MOCK } from '@/lib/api-client';
+import { api, ENDPOINTS, isLive } from '@/lib/api-client';
 import { delay } from '@/lib/utils';
 import { patients, patientById, CURRENT_PATIENT_ID } from '@/lib/mock/patients';
 import { psychologistById } from '@/lib/mock/psychologists';
@@ -9,7 +9,7 @@ import { payments } from '@/lib/mock/payments';
 export const patientService = {
   /** GET /api/patients */
   async list(page = 1, perPage = 10, query?: string): Promise<Paginated<Patient>> {
-    if (!USE_MOCK) {
+    if (isLive('patients')) {
       return api.get<Paginated<Patient>>(ENDPOINTS.patients, {
         params: { page, per_page: perPage, q: query },
       });
@@ -34,21 +34,21 @@ export const patientService = {
 
   /** GET /api/patients/{id} */
   async getById(id: ID): Promise<Patient | null> {
-    if (!USE_MOCK) return api.get<Patient>(ENDPOINTS.patient(id)).catch(() => null);
+    if (isLive('patients')) return api.get<Patient>(ENDPOINTS.patient(id)).catch(() => null);
     await delay(140);
     return patientById.get(id) ?? null;
   },
 
   /** The signed-in patient. Replace with the /api/me response once auth lands. */
   async current(): Promise<Patient> {
-    if (!USE_MOCK) return api.get<Patient>('/me');
+    if (isLive('patients')) return api.get<Patient>('/me');
     await delay(80);
     return patientById.get(CURRENT_PATIENT_ID)!;
   },
 
   /** Patients a given practitioner has actually seen, with visit summaries. */
   async forPsychologist(psychologistId: ID) {
-    if (!USE_MOCK) {
+    if (isLive('patients')) {
       return api.get<
         (Patient & { sessionCount: number; lastSessionAt?: string; nextSessionAt?: string })[]
       >(`/psychologists/${psychologistId}/patients`);
@@ -85,7 +85,7 @@ export const patientService = {
 
   /** Psychologists the patient has favourited. */
   async favorites(patientId: ID): Promise<Psychologist[]> {
-    if (!USE_MOCK) return api.get<Psychologist[]>(`${ENDPOINTS.patient(patientId)}/favorites`);
+    if (isLive('patients')) return api.get<Psychologist[]>(`${ENDPOINTS.patient(patientId)}/favorites`);
     await delay(160);
     const patient = patientById.get(patientId);
     if (!patient) return [];
@@ -95,7 +95,7 @@ export const patientService = {
   },
 
   async toggleFavorite(patientId: ID, psychologistId: ID): Promise<boolean> {
-    if (!USE_MOCK) {
+    if (isLive('patients')) {
       const res = await api.post<{ favorited: boolean }>(
         `${ENDPOINTS.patient(patientId)}/favorites`,
         { psychologist_id: psychologistId },
@@ -115,7 +115,7 @@ export const patientService = {
   },
 
   async stats(patientId: ID): Promise<PatientStats> {
-    if (!USE_MOCK) return api.get<PatientStats>(`${ENDPOINTS.patient(patientId)}/stats`);
+    if (isLive('patients')) return api.get<PatientStats>(`${ENDPOINTS.patient(patientId)}/stats`);
     await delay(150);
 
     const now = new Date();
