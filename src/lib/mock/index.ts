@@ -7,4 +7,5 @@ export * from './payments';
 export * from './payment-info';
 export * from './subscriptions';
 export * from './subscription-invoices';
+export * from './consultation-invoices';
 export * from './messages';

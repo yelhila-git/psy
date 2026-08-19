@@ -61,8 +61,8 @@ export function DashboardShell({
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="lg:ps-[280px]">
-        <header className="sticky top-0 z-30 flex h-[72px] items-center gap-4 border-b border-border bg-background/95 px-5 backdrop-blur lg:px-8">
+      <div className="print:ps-0 lg:ps-[280px]">
+        <header className="sticky top-0 z-30 flex h-[72px] items-center gap-4 border-b border-border bg-background/95 px-5 backdrop-blur print:hidden lg:px-8">
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
@@ -122,7 +122,7 @@ export function DashboardShell({
           </div>
         </header>
 
-        <main id="main" className="p-5 lg:p-8">
+        <main id="main" className="p-5 print:p-0 lg:p-8">
           {children}
         </main>
       </div>

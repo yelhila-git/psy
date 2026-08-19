@@ -104,6 +104,8 @@ export const ENDPOINTS = {
   patient: (id: string) => `/patients/${id}`,
   payments: '/payments',
   payment: (id: string) => `/payments/${id}`,
+  invoices: '/invoices',
+  invoice: (id: string) => `/invoices/${id}`,
   conversations: '/conversations',
   messages: (conversationId: string) => `/conversations/${conversationId}/messages`,
   adminStats: '/admin/stats',

@@ -7,6 +7,7 @@ import {
   CalendarDays,
   CalendarRange,
   CreditCard,
+  FileText,
   Heart,
   Landmark,
   LayoutDashboard,
@@ -55,6 +56,7 @@ export const PSYCHOLOGIST_NAV: NavItem[] = [
   { label: 'Paiements à confirmer', href: '/dashboard/psychologist/payments', icon: Landmark },
   { label: 'Mes informations de paiement', href: '/dashboard/psychologist/payment-info', icon: CreditCard },
   { label: 'Revenus', href: '/dashboard/psychologist/earnings', icon: Wallet },
+  { label: 'Factures', href: '/dashboard/psychologist/invoices', icon: FileText },
   { label: 'Mon abonnement', href: '/dashboard/psychologist/subscription', icon: Repeat },
   { label: 'Mon profil', href: '/dashboard/psychologist/profile', icon: User },
   { label: 'Paramètres', href: '/dashboard/psychologist/settings', icon: Settings },
@@ -112,7 +114,7 @@ export function Sidebar({
 
       <aside
         className={cn(
-          'fixed inset-y-0 start-0 z-50 flex w-[280px] flex-col border-e border-border bg-card transition-transform duration-200 lg:translate-x-0 rtl:translate-x-full rtl:lg:translate-x-0',
+          'fixed inset-y-0 start-0 z-50 flex w-[280px] flex-col border-e border-border bg-card transition-transform duration-200 print:hidden lg:translate-x-0 rtl:translate-x-full rtl:lg:translate-x-0',
           open ? 'translate-x-0 rtl:translate-x-0' : '-translate-x-full',
         )}
         aria-label="Navigation du tableau de bord"

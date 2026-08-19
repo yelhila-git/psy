@@ -21,6 +21,16 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(public)/page.js"
     ],
+    "/(public)/psychologists/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(public)/psychologists/page.js"
+    ],
+    "/(public)/how-it-works/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(public)/how-it-works/page.js"
+    ],
     "/(auth)/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -31,15 +41,20 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(auth)/login/page.js"
     ],
-    "/dashboard/psychologist/layout": [
+    "/(auth)/register/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/psychologist/layout.js"
+      "static/chunks/app/(auth)/register/page.js"
     ],
-    "/dashboard/psychologist/page": [
+    "/register/psychologist/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/psychologist/page.js"
+      "static/chunks/app/register/psychologist/layout.js"
+    ],
+    "/register/psychologist/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/register/psychologist/page.js"
     ]
   }
 }

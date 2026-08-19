@@ -18,6 +18,7 @@ import {
   paymentWindowEnd,
   visibleInstructions,
 } from '@/lib/payments';
+import { issueForAppointmentSync } from './invoice-service';
 import { payments, paymentById } from '@/lib/mock/payments';
 import { paymentInfoByPsychologist } from '@/lib/mock/payment-info';
 import { appointmentById } from '@/lib/mock/appointments';
@@ -312,6 +313,10 @@ export const paymentService = {
     if (appointment) {
       appointment.status = 'confirmed';
       appointment.meetingUrl = `/consultation/${appointment.id}`;
+      // Confirming receipt is the moment the consultation becomes billable, so
+      // the invoice is a consequence of that act rather than a separate chore
+      // the practitioner has to remember. Idempotent by appointment.
+      issueForAppointmentSync(appointment.id);
     }
 
     return hydratePayment(payment);

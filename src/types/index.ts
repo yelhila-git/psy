@@ -152,6 +152,88 @@ export interface SubscriptionChangeQuote {
 export type ConsultationMode = 'video' | 'audio' | 'chat';
 
 // ---------------------------------------------------------------------------
+// Consultation invoices — the practitioner's own receipts
+// ---------------------------------------------------------------------------
+
+/**
+ * A consultation invoice is not a payment.
+ *
+ * The payment record tracks a transfer the platform never touches; the invoice
+ * is the practitioner's own document attesting what was billed for a session.
+ * A free first consultation therefore still gets an invoice at zero — the
+ * session happened and belongs in the practitioner's records — while a booking
+ * that was released or cancelled leaves the invoice marked `cancelled` rather
+ * than deleting it, because an issued reference must never be reused.
+ */
+export type ConsultationInvoiceStatus = 'paid' | 'free' | 'cancelled';
+
+/**
+ * Who issued the invoice, frozen at issue time.
+ *
+ * Snapshotted rather than looked up: an invoice records what was billed on the
+ * day it was billed. A practitioner who later edits their title, moves city or
+ * raises their rate must not silently rewrite documents already handed to
+ * patients.
+ */
+export interface InvoiceParty {
+  id: ID;
+  fullName: string;
+  email: string;
+  /** Practitioner only — "Psychologue clinicienne". */
+  title?: string;
+  city?: string;
+}
+
+/** One billable line. A consultation bills as a single line today. */
+export interface ConsultationInvoiceLine {
+  label: string;
+  durationMinutes: number;
+  /** Centimes for the full session at the standard rate. */
+  unitPrice: number;
+  /** Centimes actually charged on this line. */
+  amount: number;
+}
+
+/** The consultation an invoice documents, snapshotted alongside it. */
+export interface InvoiceConsultationDetail {
+  appointmentReference: string;
+  startsAt: ISODate;
+  endsAt: ISODate;
+  durationMinutes: number;
+  mode: ConsultationMode;
+  isFirstConsultation: boolean;
+  reason?: string;
+}
+
+export interface ConsultationInvoice {
+  id: ID;
+  /** Human-facing code on the document, e.g. "FAC-2026-00042". */
+  reference: string;
+  appointmentId: ID;
+  patientId: ID;
+  psychologistId: ID;
+  issuer: InvoiceParty;
+  billedTo: InvoiceParty;
+  consultation: InvoiceConsultationDetail;
+  lines: ConsultationInvoiceLine[];
+  /** Centimes before the first-consultation discount. */
+  subtotal: number;
+  /** Centimes waived. Equals `subtotal` on a free first consultation. */
+  discount: number;
+  /** Centimes actually due — `subtotal - discount`. */
+  total: number;
+  currency: string;
+  status: ConsultationInvoiceStatus;
+  /** The transfer reference the patient quoted; absent on a free session. */
+  paymentReference?: string;
+  paymentMethod?: TransferMethod;
+  paidAt?: ISODate;
+  issuedAt: ISODate;
+  cancelledAt?: ISODate;
+  cancellationReason?: string;
+}
+
+// ---------------------------------------------------------------------------
 // Users
 // ---------------------------------------------------------------------------
 

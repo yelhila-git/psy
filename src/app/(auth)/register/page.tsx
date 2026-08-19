@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, Mail, User } from 'lucide-react';
+import { Eye, EyeOff, Mail, Phone, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/misc';
@@ -35,6 +35,7 @@ export default function RegisterPage() {
     firstName: '',
     lastName: '',
     email: '',
+    phone: '',
     password: '',
     confirmPassword: '',
     accepted: false,
@@ -52,6 +53,9 @@ export default function RegisterPage() {
     if (form.firstName.trim().length < 2) next.firstName = 'Prénom requis';
     if (form.lastName.trim().length < 2) next.lastName = 'Nom requis';
     if (!/^\S+@\S+\.\S+$/.test(form.email)) next.email = 'Adresse e-mail invalide';
+    if (!form.phone.trim()) next.phone = 'Numéro de téléphone requis';
+    else if (form.phone.replace(/\D/g, '').length < 9)
+      next.phone = 'Numéro de téléphone invalide';
     if (form.password.length < 8) next.password = 'Au moins 8 caractères';
     if (!form.confirmPassword) next.confirmPassword = 'Confirmez votre mot de passe';
     else if (form.confirmPassword !== form.password)
@@ -113,6 +117,19 @@ export default function RegisterPage() {
             invalid={Boolean(errors.email)}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
             startAdornment={<Mail />}
+          />
+        </Field>
+
+        <Field label="Téléphone" htmlFor="phone" error={errors.phone} required>
+          <Input
+            id="phone"
+            type="tel"
+            autoComplete="tel"
+            placeholder="+212 6 00 00 00 00"
+            value={form.phone}
+            invalid={Boolean(errors.phone)}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            startAdornment={<Phone />}
           />
         </Field>
 

@@ -8,6 +8,7 @@ import type {
 import { api, ENDPOINTS, USE_MOCK } from '@/lib/api-client';
 import { delay } from '@/lib/utils';
 import { consultationTerms, isFirstConsultation } from '@/lib/consultations';
+import { issueForAppointmentSync } from './invoice-service';
 import { appointments, appointmentById } from '@/lib/mock/appointments';
 import { psychologistById } from '@/lib/mock/psychologists';
 import { patientById } from '@/lib/mock/patients';
@@ -284,6 +285,10 @@ export const appointmentService = {
     appointments.push(created);
     appointmentById.set(id, created);
     persist(created);
+    // A free session is confirmed the moment it is booked, so there is no
+    // payment confirmation to hang its invoice off — it is billed at zero here
+    // instead. Paid bookings are invoiced by `paymentService.confirm`.
+    if (created.isFree) issueForAppointmentSync(created.id);
     return hydrate(created);
   },
 

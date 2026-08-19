@@ -279,6 +279,24 @@ type LayoutConfig<Route extends LayoutRoutes = LayoutRoutes> = {
   type __Unused = __Check
 }
 
+// Validate ../../src/app/dashboard/psychologist/invoices/[invoiceId]/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/dashboard/psychologist/invoices/[invoiceId]">> = Specific
+  const handler = {} as typeof import("../../src/app/dashboard/psychologist/invoices/[invoiceId]/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/dashboard/psychologist/invoices/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/dashboard/psychologist/invoices">> = Specific
+  const handler = {} as typeof import("../../src/app/dashboard/psychologist/invoices/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../src/app/dashboard/psychologist/messages/page.tsx
 {
   type __IsExpected<Specific extends AppPageConfig<"/dashboard/psychologist/messages">> = Specific
