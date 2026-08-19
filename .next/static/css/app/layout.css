@@ -1235,6 +1235,9 @@ video {
 .visible {
   visibility: visible;
 }
+.collapse {
+  visibility: collapse;
+}
 .fixed {
   position: fixed;
 }

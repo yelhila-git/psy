@@ -26,11 +26,6 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(public)/psychologists/page.js"
     ],
-    "/(public)/how-it-works/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(public)/how-it-works/page.js"
-    ],
     "/(auth)/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -41,20 +36,50 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(auth)/login/page.js"
     ],
+    "/dashboard/psychologist/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/dashboard/psychologist/layout.js"
+    ],
+    "/dashboard/psychologist/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/dashboard/psychologist/page.js"
+    ],
     "/(auth)/register/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(auth)/register/page.js"
     ],
-    "/register/psychologist/layout": [
+    "/dashboard/psychologist/profile/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/register/psychologist/layout.js"
+      "static/chunks/app/dashboard/psychologist/profile/page.js"
     ],
-    "/register/psychologist/page": [
+    "/dashboard/psychologist/availability/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/register/psychologist/page.js"
+      "static/chunks/app/dashboard/psychologist/availability/page.js"
+    ],
+    "/dashboard/patient/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/dashboard/patient/layout.js"
+    ],
+    "/dashboard/patient/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/dashboard/patient/page.js"
+    ],
+    "/admin/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/layout.js"
+    ],
+    "/admin/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/page.js"
     ]
   }
 }

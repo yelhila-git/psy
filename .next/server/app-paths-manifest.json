@@ -1,8 +1,6 @@
 {
-  "/(public)/psychologists/page": "app/(public)/psychologists/page.js",
-  "/(public)/how-it-works/page": "app/(public)/how-it-works/page.js",
-  "/(auth)/login/page": "app/(auth)/login/page.js",
-  "/register/psychologist/page": "app/register/psychologist/page.js",
   "/(public)/page": "app/(public)/page.js",
-  "/(auth)/register/page": "app/(auth)/register/page.js"
+  "/(public)/psychologists/page": "app/(public)/psychologists/page.js",
+  "/(auth)/login/page": "app/(auth)/login/page.js",
+  "/dashboard/psychologist/page": "app/dashboard/psychologist/page.js"
 }
