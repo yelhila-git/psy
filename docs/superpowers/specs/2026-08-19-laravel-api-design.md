@@ -53,6 +53,33 @@ Two environment items must be handled before the first migration:
    `utf8mb4 / utf8mb4_unicode_ci` while the database is still empty.
 2. MySQL 5.7 with utf8mb4 requires `Schema::defaultStringLength(191)` in
    `AppServiceProvider`, or unique indexes on string columns fail to migrate.
+3. **CORS.** Every call originates from the browser at `localhost:3000`, a
+   different origin from the API at `127.0.0.1:8000`. Without a published
+   `config/cors.php` allowing that origin the browser blocks all of them, so
+   this is not optional. Found during implementation, not planning.
+4. A separate **`psyapi_testing`** database. `RefreshDatabase` truncates every
+   table it touches, which would otherwise wipe the seeded dev data on each
+   run.
+
+## Rolling out endpoint by endpoint
+
+The backend lands one milestone at a time while the frontend already calls
+roughly thirty-five endpoints across nine services. `NEXT_PUBLIC_API_URL` is
+therefore not sufficient on its own to decide whether a call can be made —
+setting it sends every service live at once and 404s on everything a milestone
+has not reached.
+
+The frontend reads a second variable, `NEXT_PUBLIC_LIVE_SERVICES`, listing what
+is actually backed. `isLive('psychologists.list')` matches either the exact
+method key or the bare service name, so a service goes live one endpoint at a
+time and collapses to its plain name once the backend covers all of it.
+Anything absent keeps resolving from the mock repositories, which is what lets
+the whole app keep running against a partial API.
+
+**Session transport.** The practitioner dashboard renders in server components,
+so the token cannot live in `localStorage` — it is set as the `amp_token`
+cookie at login and read back through `next/headers`. A missing or rejected
+token redirects to `/login` rather than raising an error page.
 
 ## Contract details that are easy to get wrong
 
