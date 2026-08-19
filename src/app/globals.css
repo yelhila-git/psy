@@ -1,0 +1,228 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   AlloMonPsy design tokens
+   --------------------------------------------------------------------------
+   Every value below was extracted from the Figma source of truth
+   (Allomnpsy-Homepage-10-23, file Q7HO07jg6S3BWMVTj33Ho8).
+
+   Hex -> HSL is used so Tailwind opacity modifiers work (bg-primary/10).
+
+     #2A939E  teal        primary        buttons, links, eyebrow labels
+     #263159  navy        secondary      headings, dark sections, footer
+     #10AA9B  mint        accent         highlights + the signature shadow
+     #4BB5C1  light teal  accent-soft    secondary CTAs on dark imagery
+     #5D6D8F  slate blue  muted-fg       body copy, inactive nav
+     #92929D  gray        subtle-fg      metadata, timestamps
+     #E3F5F9  mint tint   surface        page background behind cards
+     #F5F8FD  blue tint   surface-alt    alternating section background
+     #CBE6EC  teal border chip outlines
+     #00B212 / #FF9500 / #DA0808  success / warning / error
+   ========================================================================== */
+
+@layer base {
+  :root {
+    /* --- Core palette ---------------------------------------------------- */
+    --background: 0 0% 100%;
+    --foreground: 227 40% 25%;
+
+    --primary: 186 58% 39%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 186 60% 33%;
+    --primary-soft: 191 65% 93%;
+
+    --secondary: 227 40% 25%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-hover: 227 40% 20%;
+    --secondary-soft: 218 67% 98%;
+
+    --accent: 174 83% 36%;
+    --accent-foreground: 0 0% 100%;
+    --accent-soft: 186 49% 53%;
+
+    /* --- Surfaces --------------------------------------------------------- */
+    --surface: 191 65% 93%;
+    --surface-alt: 218 67% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 227 40% 25%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 227 40% 25%;
+
+    /* --- Text ------------------------------------------------------------- */
+    --muted: 218 67% 98%;
+    --muted-foreground: 221 21% 46%;
+    --subtle-foreground: 240 5% 59%;
+
+    /* --- Lines & inputs --------------------------------------------------- */
+    --border: 214 35% 92%;
+    --border-strong: 191 46% 86%;
+    --input: 214 35% 92%;
+    --ring: 186 58% 39%;
+
+    /* --- Status ----------------------------------------------------------- */
+    --success: 126 100% 35%;
+    --success-foreground: 0 0% 100%;
+    --success-soft: 126 60% 94%;
+    --warning: 35 100% 50%;
+    --warning-foreground: 0 0% 100%;
+    --warning-soft: 35 100% 95%;
+    --error: 0 93% 44%;
+    --error-foreground: 0 0% 100%;
+    --error-soft: 0 85% 96%;
+    --destructive: 0 93% 44%;
+    --destructive-foreground: 0 0% 100%;
+    --info: 227 40% 25%;
+    --info-soft: 218 67% 96%;
+
+    /* --- Decorative accents (from the Figma illustrations) ---------------- */
+    --lavender: 275 81% 86%;
+    --amber: 40 100% 76%;
+
+    /* --- Radius ----------------------------------------------------------- */
+    /* Figma: 47x r5 (controls), 42x r4, 18x r10 (cards), pills at r40 */
+    --radius: 1.25rem; /* 20px — the card radius */
+    --radius-control: 0.3125rem; /* 5px — buttons, inputs */
+  }
+
+  .dark {
+    --background: 227 40% 12%;
+    --foreground: 210 30% 96%;
+
+    --primary: 186 55% 46%;
+    --primary-foreground: 227 40% 12%;
+    --primary-hover: 186 55% 52%;
+    --primary-soft: 186 40% 20%;
+
+    --secondary: 210 30% 96%;
+    --secondary-foreground: 227 40% 12%;
+    --secondary-hover: 210 30% 90%;
+    --secondary-soft: 227 35% 17%;
+
+    --accent: 174 70% 42%;
+    --accent-foreground: 227 40% 12%;
+    --accent-soft: 186 45% 45%;
+
+    --surface: 227 38% 15%;
+    --surface-alt: 227 35% 17%;
+    --card: 227 36% 16%;
+    --card-foreground: 210 30% 96%;
+    --popover: 227 36% 16%;
+    --popover-foreground: 210 30% 96%;
+
+    --muted: 227 35% 18%;
+    --muted-foreground: 220 16% 68%;
+    --subtle-foreground: 220 12% 58%;
+
+    --border: 227 28% 24%;
+    --border-strong: 227 28% 30%;
+    --input: 227 28% 24%;
+    --ring: 186 55% 46%;
+
+    --success-soft: 126 40% 18%;
+    --warning-soft: 35 50% 18%;
+    --error-soft: 0 45% 20%;
+    --info-soft: 227 35% 20%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+  }
+
+  /* Figma headings are Heebo Bold in navy with tight leading. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold tracking-tight text-secondary;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    @apply bg-primary/20 text-secondary;
+  }
+
+  /* Focus ring — one consistent treatment across every interactive element. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer components {
+  /* The eyebrow label above section headings: teal, uppercase, wide tracking.
+     Seen throughout the Figma ("MEET OUR PSYCHOLOGIST", "WHAT WE DO", "BLOG"). */
+  .eyebrow {
+    @apply text-xs font-bold uppercase tracking-[0.18em] text-primary;
+  }
+
+  /* Standard page gutter. Figma content column is 1280px inside a 1425px frame. */
+  .container-page {
+    @apply mx-auto w-full max-w-[1280px] px-5 sm:px-6 lg:px-10;
+  }
+
+  /* The navy hero/section band used for "Ateliers & Cours" and the profile header. */
+  .band-navy {
+    @apply bg-secondary text-white;
+  }
+}
+
+@layer utilities {
+  /* Logical-property helpers so the whole UI mirrors under dir="rtl"
+     without duplicating class names for Arabic. */
+  .ps-safe {
+    padding-inline-start: 1rem;
+  }
+  .pe-safe {
+    padding-inline-end: 1rem;
+  }
+
+  /* Flip decorative icons (arrows, chevrons) in RTL. */
+  [dir='rtl'] .rtl-flip {
+    transform: scaleX(-1);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  /* Hide scrollbars on horizontal chip rails (mobile filters, day picker). */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* The subtle puzzle-piece texture behind the profile header in the Figma. */
+.pattern-puzzle {
+  background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.07' stroke-width='1.5'%3E%3Cpath d='M0 30h18a6 6 0 1 1 12 0h18v18a6 6 0 1 0 0 12v18H30a6 6 0 1 0-12 0H0V60a6 6 0 1 1 0-12z'/%3E%3Cpath d='M60 30h18a6 6 0 1 1 12 0h18v18a6 6 0 1 0 0 12v18H90a6 6 0 1 0-12 0H60V60a6 6 0 1 1 0-12z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 120px 120px;
+}
+
+/* Soft radial mint wash used behind the hero. */
+.wash-mint {
+  background-image:
+    radial-gradient(60% 80% at 85% 10%, hsl(var(--primary) / 0.1) 0%, transparent 60%),
+    radial-gradient(50% 60% at 5% 90%, hsl(var(--accent) / 0.08) 0%, transparent 55%);
+}
